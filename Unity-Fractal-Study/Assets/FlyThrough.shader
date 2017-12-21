@@ -293,7 +293,8 @@ Shader "Custom/FlyThrough" {
 		{
 			// Unit direction ray vector: Note the absence of a divide term. I came across
 			// this via a comment Shadertoy user "coyote" made. I'm pretty happy with this.
-			float3 rd = (float3(2.*i.uv - _ScreenParams.xy, _ScreenParams.y));
+			//vec3 rd = (vec3(2.*fragCoord - iResolution.xy, iResolution.y));
+			float3 rd = (float3(2.*(i.uv.xy *_ScreenParams.xy) - _ScreenParams.xy, _ScreenParams.y));
 
 			// Barrel distortion;
 			rd = normalize(float3(rd.xy, sqrt(rd.z*rd.z - dot(rd.xy, rd.xy)*0.2)));
