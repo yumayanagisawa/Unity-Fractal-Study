@@ -1,4 +1,37 @@
 ﻿// The shader code is converted from Flythrough(https://www.shadertoy.com/view/XsKXzc) created by Shane on Shadertoy
+/*
+
+KIFS Flythrough
+---------------
+
+After looking at Zackpudil's recent fractal shaders, I thought I'd put together something
+fractal in nature. It's nothing exciting, just the standard IFS stuff you see here and there.
+Like many examples, this particular one is based on Syntopia and Knighty's work.
+
+The construction is pretty similar to that of an infinite sponge, but it has a bit of rotating,
+folding, stretching, etc, thrown into the mix.
+
+The blueish environmental lighting is experimental, and based on XT95s environment mapping in
+his UI example. The idea is very simple: Instead of passing a reflective ray into a cubic
+texture in cartesian form, convert it to its polar angles, then index into a 2D texture. The
+results are abstract, and no substitute for the real thing, but not too bad, all things
+considered.
+
+The comments are a little rushed, but I'll tidy them up later.
+
+Examples and references:
+
+Menger Journey - Syntopia
+https://www.shadertoy.com/view/Mdf3z7
+
+// Explains the process in more detail.
+Kaleidoscopic (escape time) IFS - Knighty
+http://www.fractalforums.com/ifs-iterated-function-systems/kaleidoscopic-(escape-time-ifs)/
+
+Ancient Generators - Zackpudil
+https://www.shadertoy.com/view/4sGXzV
+
+*/
 
 Shader "Custom/FlyThrough" {
 	Properties {
@@ -38,7 +71,7 @@ Shader "Custom/FlyThrough" {
 			return o;
 		}
 
-		#define FAR 40.
+		#define FAR 80.
 
 		float hash(float n) { return frac(cos(n)*45758.5453); }
 
@@ -74,23 +107,20 @@ Shader "Custom/FlyThrough" {
 
 			float d = 1e5; // Distance.
 
-
 			p = abs(frac(p*.5)*2. - 1.); // Standard spacial repetition.
-
 
 			float amp = 1. / s; // Analogous to layer amplitude.
 
-
-								// With only two iterations, you could unroll this for more speed,
-								// but I'm leaving it this way for anyone who wants to try more
-								// iterations.
+			// With only two iterations, you could unroll this for more speed,
+			// but I'm leaving it this way for anyone who wants to try more
+			// iterations.
 			for (int i = 0; i<2; i++) {
 
 				// Rotating.
 				// for now comment
 				// they should be like this
-				// p.xy = vec2(p.x * m[0][0]+ p.y * m[1][0], p.x * m[0][1] + p.y * m[1][1]);
-				// p.yz = vec2(p.y * m2[0][0] + p.z * m2[1][0], p.y * m2[0][1] + p.z * m2[1][1]);
+				p.xy = float2(p.x * m[0][0]+ p.y * m[0][1], p.x * m[1][0] + p.y * m[1][1]);
+				p.yz = float2(p.y * m2[0][0] + p.z * m2[0][1], p.y * m2[1][0] + p.z * m2[1][1]);
 				//p.xy = m*p.xy;
 				//p.yz = m2*p.yz;
 
@@ -154,7 +184,6 @@ Shader "Custom/FlyThrough" {
 			}
 			return t;
 		}
-
 
 
 		// Tetrahedral normal, to save a couple of "map" calls. Courtesy of IQ.
@@ -372,52 +401,16 @@ Shader "Custom/FlyThrough" {
 			float mist = getMist(ro, rd, lp, t);
 			float3 sky = float3(.35, .6, 1)* lerp(1., .75, mist);//*(rd.y*.25 + 1.);
 
-															// Mix the smokey haze with the object.
+			// Mix the smokey haze with the object.
 			col = lerp(sky, col, 1. / (t*t / FAR / FAR*128. + 1.));
 
 			// Statistically unlikely 2.0 gamma correction, but it'll do. :)
 			//fragColor = vec4(sqrt(clamp(col, 0., 1.)), 1);
 			return float4(sqrt(clamp(col, 0., 1.)), 1);
 		}
-
-
 		ENDCG
 		}
-
 	}
 	FallBack "Diffuse"
 }
 
-/*
-
-KIFS Flythrough
----------------
-
-After looking at Zackpudil's recent fractal shaders, I thought I'd put together something
-fractal in nature. It's nothing exciting, just the standard IFS stuff you see here and there.
-Like many examples, this particular one is based on Syntopia and Knighty's work.
-
-The construction is pretty similar to that of an infinite sponge, but it has a bit of rotating,
-folding, stretching, etc, thrown into the mix.
-
-The blueish environmental lighting is experimental, and based on XT95s environment mapping in
-his UI example. The idea is very simple: Instead of passing a reflective ray into a cubic
-texture in cartesian form, convert it to its polar angles, then index into a 2D texture. The
-results are abstract, and no substitute for the real thing, but not too bad, all things
-considered.
-
-The comments are a little rushed, but I'll tidy them up later.
-
-Examples and references:
-
-Menger Journey - Syntopia
-https://www.shadertoy.com/view/Mdf3z7
-
-// Explains the process in more detail.
-Kaleidoscopic (escape time) IFS - Knighty
-http://www.fractalforums.com/ifs-iterated-function-systems/kaleidoscopic-(escape-time-ifs)/
-
-Ancient Generators - Zackpudil
-https://www.shadertoy.com/view/4sGXzV
-
-*/
